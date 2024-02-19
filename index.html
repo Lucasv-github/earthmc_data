@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<body>
+<canvas id="canvas" width="1000" height="1000" style="border:1px solid grey;"></canvas>
+<p id ="current_player", style="font-size:30px">Player</p>
+
+<script>
+//This code sucks but it doesn't really matter
+var myCanvas = document.getElementById('canvas');
+var ctx = myCanvas.getContext('2d');
+
+ctx.canvas.width  = window.innerWidth;
+ctx.canvas.height = window.innerHeight*0.9;
+
+var global_zoom = 1;
+var globa_x_adjust = 0;
+var globa_y_adjust = 0;
+
+var img = new Image;
+img.crossOrigin = "anonymous";
+
+img.onload = function(){
+  draw_image_scaled(img, ctx,global_zoom,0,0);
+};
+img.src = "https://raw.githubusercontent.com/Lucasv-github/earthmc_data/main/2024-02-17/Base_image.png";
+
+var player_color_list;
+get_text();
+
+myCanvas.addEventListener("mousemove", update_name, false);
+
+myCanvas.addEventListener("wheel", function(e) {
+	if(Math.sign(e.deltaY) == 1)
+	{
+	  if(global_zoom != 1)
+	  {
+	    global_zoom-=1;
+	    draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
+	  }
+	}
+	else
+	{
+	  global_zoom+=1;
+	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
+	}
+	
+});
+
+document.addEventListener('keydown', checkKey)
+
+function checkKey(e) {
+
+    e = e || window.event;
+
+    if (e.keyCode == '38') 
+	{
+	  //console.log("up");
+	  e.preventDefault();
+	  globa_y_adjust += 50;
+	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
+    }
+    else if (e.keyCode == '40') 
+	{
+	  //console.log("down");
+	  e.preventDefault();
+	  globa_y_adjust -= 50;
+	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
+    }
+    else if (e.keyCode == '37') 
+	{
+	  //console.log("right");
+	  e.preventDefault();
+	  globa_x_adjust += 50;
+	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
+    }
+    else if (e.keyCode == '39') 
+	{
+	  //console.log("left");
+	  e.preventDefault();
+	  globa_x_adjust -= 50;
+	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
+    }
+
+}
+
+
+ function update_name(e) {
+  var local_canvas = document.getElementById('canvas');
+  var pos = {
+          x:local_canvas.offsetLeft,
+          y:local_canvas.offsetTop
+        }
+  var x = e.pageX - pos.x;
+  var y = e.pageY - pos.y;
+  var c = local_canvas.getContext('2d');
+  var p = c.getImageData(x, y, 1, 1).data;
+		
+  if(p[0] != p[1] || p[1] != p[2] || p[0] != p[2])
+  {
+	get_player_name("R: "+p[0] + " G: "+p[1] + " B: " + p[2]);
+  }
+};
+
+function get_player_name(color_combination)
+{
+  player_color_list.forEach(get_player_name_iteratiuon);
+  
+  function get_player_name_iteratiuon(value, index, array)
+  {
+    if(value.split(":  ")[1] == color_combination)
+	{
+	  document.getElementById('current_player').innerText = value.split(":  ")[0];
+	}
+  }
+}
+
+
+function get_text(){
+    var request = new XMLHttpRequest();
+    request.open('GET', 'https://raw.githubusercontent.com/Lucasv-github/earthmc_data/main/2024-02-17/Color_palet.txt', true);
+    request.send(null);
+    request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+            var type = request.getResponseHeader('Content-Type');
+            if (type.indexOf("text") !== 1) {
+			  player_color_list = request.responseText.split(/\r?\n/);
+            }
+        }
+    }
+}
+
+function draw_image_scaled(img, ctx, zoom, x_adjust, y_adjust) {
+  var canvas = ctx.canvas ;
+  var hRatio = canvas.width  / img.width    ;
+  var vRatio =  canvas.height / img.height  ;
+  var ratio  = Math.min ( hRatio, vRatio );
+  var centerShift_x = ( canvas.width - img.width*ratio*zoom ) / 2+x_adjust;
+  var centerShift_y = ( canvas.height - img.height*ratio*zoom ) / 2+y_adjust;
+  ctx.clearRect(0,0,canvas.width, canvas.height);
+  ctx.drawImage(img, 0,0, img.width, img.height,centerShift_x,centerShift_y,img.width*ratio*zoom, img.height*ratio*zoom);  
+}
+</script>
+
+</body>
+</html>
