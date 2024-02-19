@@ -54,7 +54,7 @@ function checkKey(e) {
 
     if (e.keyCode == '38') 
 	{
-	  //console.log("up");
+	  console.log(globa_y_adjust);
 	  e.preventDefault();
 	  globa_y_adjust += 50;
 	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
@@ -134,8 +134,8 @@ function draw_image_scaled(img, ctx, zoom, x_adjust, y_adjust) {
   var hRatio = canvas.width  / img.width    ;
   var vRatio =  canvas.height / img.height  ;
   var ratio  = Math.min ( hRatio, vRatio );
-  var centerShift_x = ( canvas.width - img.width*ratio*zoom ) / 2+x_adjust;
-  var centerShift_y = ( canvas.height - img.height*ratio*zoom ) / 2+y_adjust;
+  var centerShift_x = ( canvas.width - img.width*ratio*zoom ) / 2+x_adjust*zoom;
+  var centerShift_y = ( canvas.height - img.height*ratio*zoom ) / 2+y_adjust*zoom;
   ctx.clearRect(0,0,canvas.width, canvas.height);
   ctx.drawImage(img, 0,0, img.width, img.height,centerShift_x,centerShift_y,img.width*ratio*zoom, img.height*ratio*zoom);  
 }
