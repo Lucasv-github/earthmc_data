@@ -2,15 +2,20 @@
 <html>
 <body>
 <canvas id="canvas" width="1000" height="1000" style="border:1px solid grey;"></canvas>
-<p id ="current_player", style="font-size:30px">Player</p>
+<p id ="current_player", style="font-size:30px">Hover over a color to get the name</p>
+
+<label style="font-size:15px", for="date_input_text">Chose a date:</label> 
+<select onchange="date_changed()" style="font-size:15px", name="date_input" id="date_input"> 
+</select>
+  
 
 <script>
 //This code sucks but it doesn't really matter
-var myCanvas = document.getElementById('canvas');
-var ctx = myCanvas.getContext('2d');
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
 
 ctx.canvas.width  = window.innerWidth;
-ctx.canvas.height = window.innerHeight*0.9;
+ctx.canvas.height = window.innerHeight*0.8;
 
 var global_zoom = 1;
 var globa_x_adjust = 0;
@@ -20,16 +25,26 @@ var img = new Image;
 img.crossOrigin = "anonymous";
 
 img.onload = function(){
-  draw_image_scaled(img, ctx,global_zoom,0,0);
+  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
 };
-img.src = "https://raw.githubusercontent.com/Lucasv-github/earthmc_data/main/2024-02-17/Base_image.png";
+
+get_dates();
 
 var player_color_list;
-get_text();
 
-myCanvas.addEventListener("mousemove", update_name, false);
 
-myCanvas.addEventListener("wheel", function(e) {
+
+function date_changed()
+{
+  var date = document.getElementById('date_input').value;
+  get_color_palet(date);
+  img.src = "https://raw.githubusercontent.com/Lucasv-github/earthmc_data/main/Data/"+date+"/Base_image.png";
+}
+
+canvas.addEventListener("mousemove", update_name, false);
+
+canvas.addEventListener("wheel", function(e) {
+    e.preventDefault();
 	if(Math.sign(e.deltaY) == 1)
 	{
 	  if(global_zoom != 1)
@@ -54,30 +69,30 @@ function checkKey(e) {
 
     if (e.keyCode == '38') 
 	{
-	  console.log(globa_y_adjust);
+	  //console.log(globa_y_adjust);
 	  e.preventDefault();
-	  globa_y_adjust += 50;
+	  globa_y_adjust += 50 * 1/global_zoom;
 	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
     }
     else if (e.keyCode == '40') 
 	{
 	  //console.log("down");
 	  e.preventDefault();
-	  globa_y_adjust -= 50;
+	  globa_y_adjust -= 50* 1/global_zoom;
 	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
     }
     else if (e.keyCode == '37') 
 	{
 	  //console.log("right");
 	  e.preventDefault();
-	  globa_x_adjust += 50;
+	  globa_x_adjust += 50* 1/global_zoom;
 	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
     }
     else if (e.keyCode == '39') 
 	{
 	  //console.log("left");
 	  e.preventDefault();
-	  globa_x_adjust -= 50;
+	  globa_x_adjust -= 50* 1/global_zoom;
 	  draw_image_scaled(img, ctx,global_zoom,globa_x_adjust,globa_y_adjust);
     }
 
@@ -115,9 +130,10 @@ function get_player_name(color_combination)
 }
 
 
-function get_text(){
+function get_color_palet(date)
+{
     var request = new XMLHttpRequest();
-    request.open('GET', 'https://raw.githubusercontent.com/Lucasv-github/earthmc_data/main/2024-02-17/Color_palet.txt', true);
+    request.open('GET', 'https://raw.githubusercontent.com/Lucasv-github/earthmc_data/main/Data/'+date+'/Color_palet.txt', true);
     request.send(null);
     request.onreadystatechange = function () {
         if (request.readyState === 4 && request.status === 200) {
@@ -128,6 +144,34 @@ function get_text(){
         }
     }
 }
+
+function get_dates(){
+    var request = new XMLHttpRequest();
+    request.open('GET', 'https://api.github.com/repos/Lucasv-github/earthmc_data/git/trees/08cfd6a95562d713f1f146b2f3c6dbbb908d61f4', true);
+    request.send(null);
+    request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+            var type = request.getResponseHeader('Content-Type');
+            if (type.indexOf("text") !== 1) {
+			  var parsed = JSON.parse(request.responseText);
+			  var select = document.getElementById('date_input');
+			  
+			  var i = 0;
+			  for(;i < parsed.tree.length; i++)
+			  {
+                var option = document.createElement('option');
+                option.value = parsed.tree[i].path;
+                option.innerHTML = parsed.tree[i].path;
+                select.appendChild(option);
+			  }
+			  
+			  select.selectedIndex = i-1;
+			  date_changed();
+            }
+        }
+    }
+}
+
 
 function draw_image_scaled(img, ctx, zoom, x_adjust, y_adjust) {
   var canvas = ctx.canvas ;
