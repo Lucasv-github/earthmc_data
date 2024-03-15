@@ -165,7 +165,7 @@ function get_dates()
         if (type.indexOf("text") !== 1) 
 		{
 		  var sha = JSON.parse(request_1.responseText).tree[0].sha;
-		  console.log(sha);
+		  //console.log(sha);
 		  var request_2 = new XMLHttpRequest();
           request_2.open('GET', 'https://api.github.com/repos/Lucasv-github/earthmc_data/git/trees/' + sha, true);
           request_2.send(null);
@@ -177,6 +177,8 @@ function get_dates()
               if (type.indexOf("text") !== 1) 
 		      {
 			    var parsed = JSON.parse(request_2.responseText);
+				
+				parsed.tree.sort(function(a,b){return new Date(b.path) - new Date(a.path);});
 			    var select = document.getElementById('date_input');
 			  
 			    var i = 0;
@@ -188,7 +190,7 @@ function get_dates()
                   select.appendChild(option);
 			    }
 			  
-			    select.selectedIndex = i-1;
+			    select.selectedIndex = 0
 			    date_changed();
 		      }
 			}
