@@ -2,10 +2,11 @@
 <html>
 <body>
 <canvas id="canvas" width="1000" height="1000" style="border:1px solid grey;"></canvas>
-<p id ="current_player", style="font-size:30px">Hover over a color to get the name</p>
+<p id ="current_player", style="font-size:30px">Hover over a color to get the player name</p>
 
-<label style="font-size:15px", for="date_input_text">Chose a date:</label> 
+<label style="font-size:20px", for="date_input_text">Chose a date:</label> 
 <select onchange="date_changed()" style="font-size:15px", name="date_input" id="date_input"></select>
+<label style="font-size:20px", for="date_input_text">, move around with the arrow keys and zoom with scroll wheel</label> 
 <br><a href="https://discord.gg/vqSuYSSMMn">Join discord</a> 
   
 
@@ -209,7 +210,8 @@ function draw_image_scaled(img, ctx, zoom, x_adjust, y_adjust)
   var ratio  = Math.min ( hRatio, vRatio );
   var centerShift_x = ( canvas.width - img.width*ratio*zoom ) / 2+x_adjust*zoom;
   var centerShift_y = ( canvas.height - img.height*ratio*zoom ) / 2+y_adjust*zoom;
-  ctx.clearRect(0,0,canvas.width, canvas.height);
+  ctx.fillStyle = "#343434"; 
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(img, 0,0, img.width, img.height,centerShift_x,centerShift_y,img.width*ratio*zoom, img.height*ratio*zoom);  
 }
 </script>
